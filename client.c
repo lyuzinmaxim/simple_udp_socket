@@ -14,7 +14,7 @@
    
 
 #define PORT     8080
-#define SERVER "10.0.111.11"
+#define SERVER "127.0.0.1"
 
 
 struct Coords {
