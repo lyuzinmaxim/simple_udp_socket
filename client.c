@@ -74,15 +74,7 @@ void send_bytes(struct Coords coord){
      printf("%d: %02X ",i, msg[i]);
     }
        
-    int sockfd;
-    struct sockaddr_in     servaddr;
-    // Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        perror("socket creation failed");
-        exit(EXIT_FAILURE);
-    }
-    memset(&servaddr, 0, sizeof(servaddr));
-      
+    int sockfd;      
     sendto(coord.sockfd, 
 	  msg, 
 	  sizeof(msg),
@@ -93,16 +85,37 @@ void send_bytes(struct Coords coord){
     //printf("msg sent.\n");
 }
 
-int main() {
-
+void get_data_send(struct Coords * structure){
+    
     uint16_t a = 100;
     uint16_t n = 253;
     uint16_t b = 200;
     uint16_t c = 300;
     uint16_t d = 400;
     float e = 0.9;
+    printf("%d %d %d %d %d \n", n, a, b, c, d);
+    
+    struct Coords *coord1 = structure;
+    coord1->frame = n;
+    coord1->top = (int)a;
+    coord1->left = (int)b;
+    coord1->width = (int)c;
+    coord1->height = (int)d;
 
-    printf("%d %d %d %d %f \n", n, a, b, c, e);
+    printf("%d %d %d %d %d \n", coord1->frame, coord1->top, coord1->left, coord1->width, coord1->height);
+    send_bytes(*coord1);
+}
+
+int main() {
+
+    /*uint16_t a = 100;
+    uint16_t n = 253;
+    uint16_t b = 200;
+    uint16_t c = 300;
+    uint16_t d = 400;
+    float e = 0.9;
+
+    printf("%d %d %d %d %f \n", n, a, b, c, e);*/
 
     int sockfd;
     struct sockaddr_in     servaddr;
@@ -119,18 +132,18 @@ int main() {
     
     struct Coords coord;
     coord.sockfd = sockfd;
-    coord.top = a;
+    /*coord.top = a;
     coord.frame = n;
     coord.left = b;
     coord.width = c;
     coord.height = d;
-    coord.conf = e;
+    coord.conf = e;*/
     coord.servaddr.sin_family = servaddr.sin_family;
     coord.servaddr.sin_port = servaddr.sin_port;
     coord.servaddr.sin_addr.s_addr = servaddr.sin_addr.s_addr;
-
+    get_data_send(&coord);
     //send_bytes(coord);
-    threadpool thpool = thpool_init(1);
+    /*threadpool thpool = thpool_init(1);
     thpool_add_work(thpool, (void*)send_bytes, &coord);
 
     thpool_wait(thpool);
@@ -138,7 +151,7 @@ int main() {
     
     close(sockfd);
 
-    printf("Socket closed.\n");
+    printf("Socket closed.\n");*/
 
     return 0;
 }
