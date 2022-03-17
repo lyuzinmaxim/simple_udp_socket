@@ -82,7 +82,17 @@ void send_bytes(struct Coords coord){
           (const struct sockaddr *) &coord.servaddr,
           sizeof(coord.servaddr));
 
-    //printf("msg sent.\n");
+    printf("\npayload sent.\n");
+
+    /* Confirming message (receiving) */
+    int n, len;
+    char confirm_msg[10];
+    n = recvfrom(coord.sockfd, (char *)confirm_msg, 512, 
+                MSG_WAITALL, (struct sockaddr *) &coord.servaddr,
+                &len);
+    confirm_msg[n] = '\0';
+    printf("I received confirm message: %s\n", confirm_msg);
+    /*________________________________*/
 }
 
 void get_data_send(struct Coords * structure){
@@ -108,15 +118,6 @@ void get_data_send(struct Coords * structure){
 
 int main() {
 
-    /*uint16_t a = 100;
-    uint16_t n = 253;
-    uint16_t b = 200;
-    uint16_t c = 300;
-    uint16_t d = 400;
-    float e = 0.9;
-
-    printf("%d %d %d %d %f \n", n, a, b, c, e);*/
-
     int sockfd;
     struct sockaddr_in     servaddr;
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
@@ -128,16 +129,10 @@ int main() {
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
     //servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_addr.s_addr = inet_addr(SERVER); //"10.0.100.11"
-    
+    servaddr.sin_addr.s_addr = inet_addr(SERVER); //"10.0.100.11"      
+
     struct Coords coord;
     coord.sockfd = sockfd;
-    /*coord.top = a;
-    coord.frame = n;
-    coord.left = b;
-    coord.width = c;
-    coord.height = d;
-    coord.conf = e;*/
     coord.servaddr.sin_family = servaddr.sin_family;
     coord.servaddr.sin_port = servaddr.sin_port;
     coord.servaddr.sin_addr.s_addr = servaddr.sin_addr.s_addr;
@@ -147,11 +142,10 @@ int main() {
     thpool_add_work(thpool, (void*)send_bytes, &coord);
 
     thpool_wait(thpool);
-    thpool_destroy(thpool);
+    thpool_destroy(thpool);*/
     
-    close(sockfd);
-
-    printf("Socket closed.\n");*/
+    //close(sockfd);
+    //printf("Socket closed.\n");
 
     return 0;
 }

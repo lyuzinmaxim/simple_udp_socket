@@ -49,6 +49,14 @@ int main() {
      printf("%d: %02X ",i, buffer[i]);
     }
     printf("\n");
-  
+
+    /* Confirming message (sending)*/
+    const char *confirm_msg = "OK";
+    sendto(sockfd, (const char *)confirm_msg, strlen(confirm_msg), 
+        MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
+            len);
+    printf("I sent confirm message!\n"); 
+       
+
     return 0;
 }
