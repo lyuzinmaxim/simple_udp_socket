@@ -12,6 +12,9 @@
 #include <fcntl.h>
 #include <poll.h>
 
+//#include <gst/gst.h>
+
+
 
 #define PORT     8080
 #define CLIENT "127.0.0.1"
@@ -25,31 +28,6 @@ struct Connecting {
     struct sockaddr_in cliaddr;
 }; 
 
-
-/*void calling(struct Connecting * structure){
-    int len, n;
-    char msg[512];
-    
-
-    len = sizeof(structure->cliaddr);  //len is value/resuslt
-    
-    n = recvfrom( structure->sockfd, 
-		  (char *)msg, 
-		  512, 
-                  MSG_WAITALL, 
-		  ( struct sockaddr *) &structure->cliaddr,
-		  &len); //n is size of message
-    if ( n > 0 )
-	{
-	msg[n] = '\0';
-	for (int i = 0; i < n; i++)
-        { 
-     		printf("%d: %02X ",i, msg[i]);
-	}
-    	printf("\n");
-	}
-    printf("n:%d \n",n);
-}*/
 
 void receive_payload(struct Connecting * structure){
     
@@ -83,22 +61,13 @@ void receive_payload(struct Connecting * structure){
 		{ 
 		 printf("%d: %02X ",i, msg[i]);
 		}
-		
+		printf("\n");
 	}
+}
 
-    /*len = sizeof(structure->cliaddr);  //len is value/resuslt
-    n = recvfrom(structure->sockfd, 
-				 (char *)msg, 
-				 512, 
-                 MSG_WAITALL, 
-				 ( struct sockaddr *) &structure->cliaddr,
-				 &len); //n is size of message
-    msg[n] = '\0';
-    for (int i = 0; i < n; i++)
-    { 
-     printf("%d: %02X ",i, msg[i]);
-    }
-    printf("\n");*/
+void calling(struct Connecting * structure){
+	//g_timeout_add (10000, receive_payload, &structure);
+    receive_payload(structure);
 }
 
     /*if(fcntl(structure->sockfd, F_SETFL, fcntl(structure->sockfd, F_GETFL) | O_NONBLOCK) < 0) {
@@ -112,40 +81,6 @@ void receive_payload(struct Connecting * structure){
 }   
 */
 
-/*int wait_client(int server_socket)
-{
-    struct pollfd pollfds[MAX_CLIENTS + 1];
-    pollfds[0].fd = server_socket;
-    pollfds[0].events = POLLIN | POLLPRI;
-    int useClient = 0;
-
-    while (1)
-    {
-        // printf("useClient => %d\n", useClient);
-        int pollResult = poll(pollfds, useClient + 1, 5000);
-        if (pollResult > 0)
-        {
-            if (pollfds[0].revents & POLLIN)
-            {
-                struct sockaddr_in cliaddr;
-				char buffer[512];
-
-                int addrlen = sizeof(cliaddr);
-                int client_socket = accept(server_socket, (struct sockaddr *)&cliaddr, &addrlen);
-                //printf("accept success %s\n", inet_ntoa(cliaddr.sin_addr));
-				
-				int len = sizeof(cliaddr);  //len is value/resuslt
-				int n = recvfrom( server_socket, 
-								  (char *)buffer, 
-								  512, 
-								  MSG_WAITALL, 
-								  ( struct sockaddr *) &cliaddr,
-								  &len); //n is size of message
-				buffer[n] = '\0';
-            }
-        }
-    }
-}*/
 
 int main() {
     int sockfd;
@@ -185,7 +120,8 @@ int main() {
 	fcntl(sockfd, F_SETFL, O_NONBLOCK);
 	printf("\naaaaa\n");
     
-	receive_payload(&connect);
+	calling(&connect);
+	//receive_payload(&connect);
 
     /* Confirming message (sending)*/
     /*const char *confirm_msg = "OK";
