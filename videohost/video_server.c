@@ -67,60 +67,70 @@ void receive_payload(struct Connecting * structure){
 
 void calling(struct Connecting * structure){
 	//g_timeout_add (10000, receive_payload, &structure);
+	//threadpool thpool = thpool_init(1);
+    //thpool_add_work(thpool, (void*)receive_payload, structure);
+    //thpool_wait(thpool);
+    //thpool_destroy(thpool);
     receive_payload(structure);
 }
 
-    /*if(fcntl(structure->sockfd, F_SETFL, fcntl(structure->sockfd, F_GETFL) | O_NONBLOCK) < 0) {
+/*  if(fcntl(structure->sockfd, F_SETFL, fcntl(structure->sockfd, F_GETFL) | O_NONBLOCK) < 0) {
     	if(fcntl(structure->sockfd, F_GETFL) & O_NONBLOCK) {
             calling(structure);
 
 
     //printf("\nI received confirm message: %s\n", msg);
 
-    //calling(structure);
-}   
+    //calling(structure);  
 */
-
-
-int main() {
-    int sockfd;
-    char buffer[512];
-    struct sockaddr_in servaddr, cliaddr;
+struct Connecting establish_connection(){
+	
+	int sockfd;
+	struct sockaddr_in servaddr, cliaddr;
     memset(&servaddr, 0, sizeof(servaddr));
     memset(&cliaddr, 0, sizeof(cliaddr));
-
-    
-	// Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { ///socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0)
+	
+	if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { ///socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0)
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }
-    
-    servaddr.sin_family    = AF_INET; // IPv4
+	
+	servaddr.sin_family    = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = inet_addr(CLIENT);
     servaddr.sin_port = htons(PORT);
-       
-    // Bind the socket with the server address
-    if ( bind(sockfd, (const struct sockaddr *)&servaddr, 
+	
+	if ( bind(sockfd, (const struct sockaddr *)&servaddr, 
             sizeof(servaddr)) < 0 )
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    
-    struct Connecting connect;
+	
+	struct Connecting connect;
     connect.sockfd = sockfd;
     connect.servaddr.sin_family = servaddr.sin_family;
     connect.servaddr.sin_port = servaddr.sin_port;
     connect.servaddr.sin_addr.s_addr = servaddr.sin_addr.s_addr;
     connect.cliaddr = cliaddr;
-    
 	
-	//int client_socket = wait_client(sockfd);
-	fcntl(sockfd, F_SETFL, O_NONBLOCK);
-	printf("\naaaaa\n");
+	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	//printf("\naaaaa\n");
+	
+	return connect;
+}
+
+int main() {
     
+	/*threadpool thpool = thpool_init(1);
+    thpool_add_work(thpool, (void*)calling, &connect);
+    thpool_wait(thpool);
+    thpool_destroy(thpool);*/
+	struct Connecting connect;
+    connect = establish_connection();
 	calling(&connect);
+	
+	printf("aaa\n");
+
 	//receive_payload(&connect);
 
     /* Confirming message (sending)*/
