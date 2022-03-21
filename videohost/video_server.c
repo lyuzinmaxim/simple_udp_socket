@@ -18,25 +18,23 @@
 
 #define PORT     8080
 #define CLIENT "127.0.0.1"
-#define SIZE 1024
-#define MAX_CLIENTS 10
+#define TO_STR(arg) #arg
 
 struct Connecting {
     int sockfd;
-    int foo;
     struct sockaddr_in servaddr;
     struct sockaddr_in cliaddr;
-}; 
+};
 
 
-void receive_payload(struct Connecting * structure){
+char* receive_payload(struct Connecting * structure){
     
 	struct pollfd pfds[1]; // More if you want to monitor more
     pfds[0].fd = structure->sockfd;          // Standard input
     pfds[0].events = POLLIN; 
 		
     int len, n;
-    char msg[512];
+    static char msg[512];
 	
 	printf("Hit RETURN or wait 2.5 seconds for timeout\n");
     int num_events = poll(pfds, 1, 10000); // 2.5 second timeout
@@ -53,37 +51,38 @@ void receive_payload(struct Connecting * structure){
 		}
 			
 		read(pfds[0].fd, &msg, 18);
-		//printf("%c",c);
-		if ( msg[0]==0xAA){
-				printf("THAT IS\n");
-		}
-		for (int i = 0; i < 18; i++)
-		{ 
-		 printf("%d: %02X ",i, msg[i]);
-		}
-		printf("\n");
+
 	}
+	//printf("\n that is size %d\n",sizeof(msg));
+	
+	return msg;
 }
 
 void calling(struct Connecting * structure){
-	//g_timeout_add (10000, receive_payload, &structure);
-	//threadpool thpool = thpool_init(1);
-    //thpool_add_work(thpool, (void*)receive_payload, structure);
-    //thpool_wait(thpool);
-    //thpool_destroy(thpool);
-    receive_payload(structure);
+	char* msg;
+    msg = receive_payload(structure);
+	
+	int run;
+	if (msg[0] == 0xAA){
+		run = 1;
+	} else {
+		run = 0;
+	}
+	
+	printf("\n run is %d\n",run);
+	/*
+	for (int i = 0; i < 18; i++){ 
+		 printf("%d: %02X ",i, msg[i]);
+	}
+	*/
+	
+	//printf("\n");
+	//printf("\n%02X\n",msg[0]);
+	//printf("\n%02X of size \n", *msg);
 }
 
-/*  if(fcntl(structure->sockfd, F_SETFL, fcntl(structure->sockfd, F_GETFL) | O_NONBLOCK) < 0) {
-    	if(fcntl(structure->sockfd, F_GETFL) & O_NONBLOCK) {
-            calling(structure);
-
-
-    //printf("\nI received confirm message: %s\n", msg);
-
-    //calling(structure);  
-*/
-struct Connecting establish_connection(){
+struct Connecting establish_connection
+(const char *client,unsigned short int *port){
 	
 	int sockfd;
 	struct sockaddr_in servaddr, cliaddr;
@@ -96,8 +95,8 @@ struct Connecting establish_connection(){
     }
 	
 	servaddr.sin_family    = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = inet_addr(CLIENT);
-    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = inet_addr(client);
+    servaddr.sin_port = htons(*port);
 	
 	if ( bind(sockfd, (const struct sockaddr *)&servaddr, 
             sizeof(servaddr)) < 0 )
@@ -113,7 +112,7 @@ struct Connecting establish_connection(){
     connect.servaddr.sin_addr.s_addr = servaddr.sin_addr.s_addr;
     connect.cliaddr = cliaddr;
 	
-	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
 	//printf("\naaaaa\n");
 	
 	return connect;
@@ -121,16 +120,13 @@ struct Connecting establish_connection(){
 
 int main() {
     
-	/*threadpool thpool = thpool_init(1);
-    thpool_add_work(thpool, (void*)calling, &connect);
-    thpool_wait(thpool);
-    thpool_destroy(thpool);*/
+	const char client [64] = CLIENT;
+	unsigned short int port = PORT;
+	
 	struct Connecting connect;
-    connect = establish_connection();
+    connect = establish_connection(client,&port);
 	calling(&connect);
 	
-	printf("aaa\n");
-
 	//receive_payload(&connect);
 
     /* Confirming message (sending)*/
